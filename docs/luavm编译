@@ -1,0 +1,5 @@
+gcc -g -O2 -Wall -fPIC --shared -o module/luavm.so -Icore -I3rd/lua/src module/luavm/module_luavm.c -Wl,--whole-archive -L3rd/lua/src -llua -Wl,--no-whole-archive -ldl -lm
+
+
+module_luavm.c 修要屏蔽 getenv() 的定义。
+编译liblua.a 需要带有 -fPIC 

@@ -1,0 +1,68 @@
+.PHONY : all clean
+
+CC = i686-w64-mingw32-gcc
+CFLAGS = -g -Wall
+LDFLAGS = -lpthread -static-libgcc 
+SHARED = -shared
+
+all : \
+	uboss.dll \
+	uboss.exe \
+	logger.so \
+	luavm.so \
+	uboss.so
+	
+
+uboss.dll : \
+	3rd/dlfcn/dlfcn.c \
+	core/uboss_server.c \
+	core/uboss_handle.c \
+	core/uboss_mq.c \
+	core/uboss_monitor.c \
+	core/uboss_timer.c \
+	core/uboss_module.c \
+	core/uboss_command.c \
+	core/uboss_context.c \
+	core/uboss_log.c 
+	$(CC) $(CFLAGS) -c $^ -I./core $(LDFLAGS) \
+	-DPTW32_STATIC_LIB -march=i686 -I/usr/i686-w64-mingw32/include -I3rd/dlfcn
+	$(CC) $(CFLAGS) $(SHARED) -o $@ *.o $(LDFLAGS) -I/usr/i686-w64-mingw32/include  -I3rd/dlfcn
+	rm *.o
+
+uboss.exe : \
+	core/uboss.c
+	$(CC) $(CFLAGS) -c $^ -I./core
+	$(CC) $(CFLAGS) -o $@ \
+		uboss.o \
+		uboss.dll \
+		-I./core $(LDFLAGS)
+	rm *.o
+
+logger.so : \
+	module/logger/module_logger.c
+	$(CC) $(CFLAGS) -c $^ -I./core
+	$(CC) $(CFLAGS) $(SHARED) -o module/$@ \
+		module_logger.o uboss.dll \
+		-I./core $(LDFLAGS) -Wl,--version-script=logger.def
+	rm *.o
+
+luavm.so : \
+	module/luavm/module_luavm.c
+	$(CC) $(CFLAGS) -c $^ -I./core -I3rd/lua/src
+	$(CC) $(CFLAGS) $(SHARED) -o module/$@ \
+		module_luavm.o uboss.dll 3rd/lua/src/lua53.dll \
+		-I./core $(LDFLAGS) -Wl,--version-script=luavm.def
+	rm *.o
+
+uboss.so : \
+	lib/uboss/lua-uboss.c \
+	lib/uboss/lua-seri.c
+	$(CC) $(CFLAGS) -c $^ -I./core -I3rd/lua/src
+	$(CC) $(CFLAGS) $(SHARED) -o lib/$@ \
+		lua-uboss.o lua-seri.o uboss.dll 3rd/lua/src/lua53.dll \
+		-I./core $(LDFLAGS)
+	rm *.o
+
+
+clean :
+	rm *.dll *.exe *.o *.a 

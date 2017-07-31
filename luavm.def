@@ -1,0 +1,7 @@
+{ 
+    global:
+	luavm_create;
+	luavm_init;
+	luavm_release;   
+    local: *;
+};
