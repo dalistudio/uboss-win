@@ -1,9 +1,23 @@
 .PHONY : all clean
 
 CC = i686-w64-mingw32-gcc
-CFLAGS = -g -Wall
-LDFLAGS = -lpthread -static-libgcc 
+CFLAGS = -g -Wall -fPIC
+LDFLAGS = -static -lpthread -static-libgcc -static-libstdc++
 SHARED = -shared
+
+
+###
+# 编译 lua
+###
+
+# lua静态库的路径
+LUA_STATICLIB := 3rd/lua/src/liblua.a
+LUA_LIB ?= $(LUA_STATICLIB)
+LUA_INC ?= 3rd/lua/src
+
+$(LUA_STATICLIB) :
+	cd 3rd/lua && $(MAKE)  mingw  CC='$(CC) -std=gnu99 -fPIC -static'
+
 
 all : \
 	uboss.dll \
@@ -26,23 +40,22 @@ uboss.dll : \
 	core/uboss_log.c 
 	$(CC) $(CFLAGS) -c $^ -I./core $(LDFLAGS) \
 	-DPTW32_STATIC_LIB -march=i686 -I/usr/i686-w64-mingw32/include -I3rd/dlfcn
-	$(CC) $(CFLAGS) $(SHARED) -o $@ *.o $(LDFLAGS) -I/usr/i686-w64-mingw32/include  -I3rd/dlfcn
+	$(CC) $(CFLAGS) $(SHARED) -o $@ *.o $(LDFLAGS) -I/usr/i686-w64-mingw32/include -I3rd/dlfcn -L3rd/lua/src
 	rm *.o
 
 uboss.exe : \
 	core/uboss.c
-	$(CC) $(CFLAGS) -c $^ -I./core
+	$(CC) $(CFLAGS) -c $^ -I./core -I/usr/i686-w64-mingw32/include -I3rd/dlfcn
 	$(CC) $(CFLAGS) -o $@ \
-		uboss.o \
-		uboss.dll \
-		-I./core $(LDFLAGS)
+		*.o uboss.dll \
+		-I./core $(LDFLAGS) -I/usr/i686-w64-mingw32/include -I3rd/dlfcn
 	rm *.o
 
 logger.so : \
 	module/logger/module_logger.c
 	$(CC) $(CFLAGS) -c $^ -I./core
 	$(CC) $(CFLAGS) $(SHARED) -o module/$@ \
-		module_logger.o uboss.dll \
+		module_logger.o uboss.dll  \
 		-I./core $(LDFLAGS) -Wl,--version-script=logger.def
 	rm *.o
 
@@ -65,4 +78,4 @@ uboss.so : \
 
 
 clean :
-	rm *.dll *.exe *.o *.a 
+	rm *.dll *.exe *.so *.o *.a 3rd/lua/src/*.o 3rd/lua/src/*.a 3rd/lua/src/*.dll 3rd/lua/src/*.exe

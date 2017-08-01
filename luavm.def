@@ -2,6 +2,7 @@
     global:
 	luavm_create;
 	luavm_init;
-	luavm_release;   
+	luavm_release;
+
     local: *;
 };

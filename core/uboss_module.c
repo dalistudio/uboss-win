@@ -70,6 +70,7 @@ _try_open(struct modules *m, const char * name) {
 			exit(1);
 		}
 		dl = dlopen(tmp, RTLD_NOW | RTLD_GLOBAL); // 尝试打开 动态链接库
+//fprintf(stdout, "dlopen 0x%X = %s\n%s\n\n", (int)dl,tmp,dlerror());
 		path = l; // 把新地址赋给 path
 	}while(dl == NULL);
 
@@ -103,6 +104,7 @@ _open_sym(struct uboss_module *mod) {
 	mod->create = dlsym(mod->module, tmp); // 实例化模块中的创建函数，并赋给模块的结构
 	strcpy(tmp+name_size, "_init"); // 将初始化名加到临时字符串中
 	mod->init = dlsym(mod->module, tmp); // 实例化模块中的初始化函数，并赋给模块的结构
+//fprintf(stdout, "dlsym 0x%X= %s\n", mod->init,tmp);
 	strcpy(tmp+name_size, "_release"); // 将释放名加到临时字符串中
 	mod->release = dlsym(mod->module, tmp); // 实例化模块中的释放函数，并赋给模块的结构
 	strcpy(tmp+name_size, "_signal"); // 将信号名加到临时字符串中

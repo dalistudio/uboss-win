@@ -108,6 +108,7 @@ _init(struct luavm *l, struct uboss_context *ctx, const char * args, size_t sz) 
 	lua_pop(L,1); // 弹出堆栈
 
 	// 设置全局变量
+	#if !defined(__WIN32__)
 	const char *path = "./service/?.lua;./framework/?.lua;./framework/?/init.lua"; // lua脚本的路径
 	lua_pushstring(L, path); // 压入框架脚本的路径字符串
 	lua_setglobal(L, "LUA_PATH"); // 设置为全局变量
@@ -125,7 +126,25 @@ _init(struct luavm *l, struct uboss_context *ctx, const char * args, size_t sz) 
 	assert(lua_gettop(L) == 1); // 断言获得堆栈顶 == 1
 
 	const char * loader = "./service/loader.lua"; // lua的加载器脚本名字
+	#else
+	const char *path = ".\\service\\?.lua;.\\framework\\?.lua;.\\framework\\?\\init.lua"; // lua脚本的路径
+	lua_pushstring(L, path); // 压入框架脚本的路径字符串
+	lua_setglobal(L, "LUA_PATH"); // 设置为全局变量
+	const char *cpath = ".\\lib\\?.so"; // lua库的路径
+	lua_pushstring(L, cpath); // 压入 lua 库的路径字符串
+	lua_setglobal(L, "LUA_LIB"); // 设置为全局变量
+	const char *service = ".\\service\\?.lua"; // lua服务的路径
+	lua_pushstring(L, service); // 压入 lua 服务脚本的路径字符串
+	lua_setglobal(L, "LUA_SERVICE"); // 设置为全局变量
+	const char *preload = uboss_command(ctx, "GETENV", "preload"); // 预加载
+	lua_pushstring(L, preload); // 压入 预加载脚本的路径字符串
+	lua_setglobal(L, "LUA_PRELOAD"); // 设置为全局变量
 
+	lua_pushcfunction(L, traceback); // 追踪
+	assert(lua_gettop(L) == 1); // 断言获得堆栈顶 == 1
+
+	const char * loader = ".\\service\\loader.lua"; // lua的加载器脚本名字
+	#endif
 	// 执行加载器脚本
 	int r = luaL_loadfile(L,loader); // 执行所有 lua 脚本，都必须要用 loader 加载器
 

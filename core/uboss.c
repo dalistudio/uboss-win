@@ -54,14 +54,27 @@ main(int argc, char *argv[]) {
 
 	// 声明 配置文件 的结构
 	struct uboss_config config;
+
+	#if !defined(__WIN32__)
 	config.path_root = "./"; // 根目录
 	config.thread =  8; // 启动工作线程数
 	config.path_module = "./module/?.so"; // C写的模块路径
 	config.harbor = 1; // 集群的编号
 	config.bootstrap = "luavm bootstrap"; // 启动脚本
 	config.log_service = "logger"; // 日志记录器的服务
-	config.log_param = "nil"; // 日志记录器
+	config.log_param = "uboss.log"; // 日志记录器
 	config.path_log = "."; // 保存日志的路径
+	#else
+	config.path_root = ".\\"; // 根目录
+	config.thread =  8; // 启动工作线程数
+	config.path_module = ".\\module\\?.so"; // C写的模块路径
+//fprintf(stdout, "Module Path = %s\n", config.path_module);
+	config.harbor = 1; // 集群的编号
+	config.bootstrap = "luavm bootstrap"; // 启动脚本
+	config.log_service = "logger"; // 日志记录器的服务
+	config.log_param = "uboss.log"; // 日志记录器
+	config.path_log = "."; // 保存日志的路径
+	#endif
 
 	uboss_server(&config); // 启动 uBoss 框架
 	uboss_globalexit(); // 退出全局初始化
