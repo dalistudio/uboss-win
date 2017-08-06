@@ -254,6 +254,7 @@ uboss_queryname(struct uboss_context * context, const char * name) {
 	uboss_error(context, "Don't support query global name %s",name);
 	return 0;
 }
+
 /*
  * 重新封装的 创建线程函数
  * */

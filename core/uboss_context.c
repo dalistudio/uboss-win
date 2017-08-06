@@ -106,7 +106,7 @@ uboss_context_new(const char * name, const char *param) {
 	CHECKCALLING_BEGIN(ctx)
 	int r = uboss_module_instance_init(mod, inst, ctx, param); // 从模块指针中获取 初始化函数的指针（模块中必须有的函数）
 	CHECKCALLING_END(ctx)
-	if (r == 0) { // 初始化函数返回值为0，表示正常。
+	if (r == 0) { // 初始化函数返回值为0，表示正常。(在服务模块中约定)
 		struct uboss_context * ret = uboss_context_release(ctx); // 检查上下文释放标志 ref 是否为0
 		if (ret) {
 			ctx->init = true; // 设置服务的上下文结构，初始化成功。

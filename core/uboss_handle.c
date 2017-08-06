@@ -18,7 +18,7 @@
 #include <string.h>
 
 #define DEFAULT_SLOT_SIZE 4 // 默认槽的大小
-#define MAX_SLOT_SIZE 0x40000000 // 最大的槽大小值
+#define MAX_SLOT_SIZE 0x40000000 // 最大的槽大小值(1024M大约10亿个)
 
 // 句柄的结构
 struct handle_name {
