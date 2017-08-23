@@ -12,10 +12,11 @@
 
 #include <stdint.h>
 
-// reserve high 8 bits for remote id
+// 保留高8bit作为远程消息的编号
 #define HANDLE_MASK 0xFFFFFF
 #define HANDLE_REMOTE_SHIFT 24
 
+// 在 uboss_context.h 中定义
 struct uboss_context;
 
 uint32_t uboss_handle_register(struct uboss_context *);

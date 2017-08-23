@@ -78,6 +78,8 @@ _report_launcher_error(struct uboss_context *ctx) {
 	uboss_sendname(ctx, 0, ".launcher", PTYPE_TEXT, 0, "ERROR", 5);
 }
 
+/*
+// 这个函数没有被使用
 // 字符串
 static const char *
 optstring(struct uboss_context *ctx, const char *key, const char * str) {
@@ -87,6 +89,7 @@ optstring(struct uboss_context *ctx, const char *key, const char * str) {
 	}
 	return ret;
 }
+*/
 
 // 初始化
 static int

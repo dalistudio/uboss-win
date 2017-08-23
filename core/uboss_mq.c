@@ -24,8 +24,7 @@
 
 // 0 表示消息队列不在全局队列中
 // 1 表示消息队列在全局队列中，或者消息在调度中
-
-#define MQ_IN_GLOBAL 1
+#define MQ_IS_GLOBAL 1
 #define MQ_OVERLOAD 1024
 
 // 消息队列的结构
@@ -35,9 +34,9 @@ struct message_queue {
 	int cap; // 链表数量
 	int head; // 链表头
 	int tail; // 链表尾
-	int release; // 是否可释放
-	int in_global; // 是否在全局队列
-	int overload; // 过载
+	int is_release; // 是否可释放
+	int is_global; // 是否在全局队列
+	int is_overload; // 是否过载
 	int overload_threshold; // 过载阀值
 	struct uboss_message *queue;  // 消息队列的指针
 	struct message_queue *next;  // 下一个消息队列的指针
@@ -54,7 +53,7 @@ static struct global_queue *Q = NULL; // 声明全局队列
 
 // 将服务的消息队列压入全局消息队列
 void
-uboss_globalmq_push(struct message_queue * queue) {
+uboss_mq_global_push(struct message_queue * queue) {
 	struct global_queue *q= Q; // 获取 全局消息队列
 
 	SPIN_LOCK(q) // 锁住
@@ -79,7 +78,7 @@ uboss_globalmq_push(struct message_queue * queue) {
 
 // 从全局消息队列中弹出服务的消息队列
 struct message_queue *
-uboss_globalmq_pop() {
+uboss_mq_global_pop() {
 	struct global_queue *q = Q; // 声明全局消息队列
 
 	SPIN_LOCK(q) // 锁住
@@ -110,11 +109,11 @@ uboss_mq_create(uint32_t handle) {
 	q->tail = 0; // 链表的尾
 	SPIN_INIT(q) // 初始化锁
 	// When the queue is create (always between service create and service init) ,
-	// set in_global flag to avoid push it to global queue .
+	// set is_global flag to avoid push it to global queue .
 	// If the service init success, uboss_context_new will call uboss_mq_push to push it to global queue.
-	q->in_global = MQ_IN_GLOBAL; // 是否在全局队列中：0=否 1=是 （默认为1）
-	q->release = 0; // 是否可释放：0=否 1=是
-	q->overload = 0; // 是否过载：0=否 1=是
+	q->is_global = MQ_IS_GLOBAL; // 是否在全局队列中：0=否 1=是 （默认为1）
+	q->is_release = 0; // 是否可释放：0=否 1=是
+	q->is_overload = 0; // 是否过载：0=否 1=是
 	q->overload_threshold = MQ_OVERLOAD; // 过载的阀值 （默认为1024）
 	q->queue = uboss_malloc(sizeof(struct uboss_message) * q->cap); // 分配队列的内存空间
 	q->next = NULL; // 下一个队列的指针
@@ -158,9 +157,9 @@ uboss_mq_length(struct message_queue *q) {
 // 消息队列过载
 int
 uboss_mq_overload(struct message_queue *q) {
-	if (q->overload) {
-		int overload = q->overload;
-		q->overload = 0; // 设置过载为零
+	if (q->is_overload) {
+		int overload = q->is_overload;
+		q->is_overload = 0; // 设置过载为零
 		return overload;
 	}
 	return 0;
@@ -191,7 +190,7 @@ uboss_mq_pop(struct message_queue *q, struct uboss_message *message) {
 
 		// 如果队列长度 大于 过载阀值，阀值放大2倍
 		while (length > q->overload_threshold) {
-			q->overload = length; // 过载值 = 队列长度
+			q->is_overload = length; // 过载值 = 队列长度
 			q->overload_threshold *= 2; // 过载阀值放大2倍
 		}
 	} else {
@@ -201,7 +200,7 @@ uboss_mq_pop(struct message_queue *q, struct uboss_message *message) {
 	}
 
 	if (ret) {
-		q->in_global = 0;
+		q->is_global = 0;
 	}
 
 	SPIN_UNLOCK(q) // 解锁
@@ -246,9 +245,9 @@ uboss_mq_push(struct message_queue *q, struct uboss_message *message) {
 	}
 
 	// 如果服务队列不在全局队列中
-	if (q->in_global == 0) {
-		q->in_global = MQ_IN_GLOBAL; // 设置队列在全局队列中
-		uboss_globalmq_push(q); // 将队列压入全局队列
+	if (q->is_global == 0) {
+		q->is_global = MQ_IS_GLOBAL; // 设置队列在全局队列中
+		uboss_mq_global_push(q); // 将队列压入全局队列
 	}
 
 	SPIN_UNLOCK(q) // 解锁
@@ -258,12 +257,12 @@ uboss_mq_push(struct message_queue *q, struct uboss_message *message) {
 void
 uboss_mq_mark_release(struct message_queue *q) {
 	SPIN_LOCK(q) // 锁住
-	assert(q->release == 0); // 断言
-	q->release = 1; // 标志释放
+	assert(q->is_release == 0); // 断言
+	q->is_release = 1; // 标志释放
 
 	// 如果队列不在全局队列中
-	if (q->in_global != MQ_IN_GLOBAL) {
-		uboss_globalmq_push(q); // 压入全局队列
+	if (q->is_global != MQ_IS_GLOBAL) {
+		uboss_mq_global_push(q); // 压入全局队列
 	}
 	SPIN_UNLOCK(q) // 解锁
 }
@@ -283,11 +282,11 @@ void
 uboss_mq_release(struct message_queue *q, message_drop drop_func, void *ud) {
 	SPIN_LOCK(q) // 锁住
 
-	if (q->release) {
+	if (q->is_release) {
 		SPIN_UNLOCK(q) // 解锁
 		_drop_queue(q, drop_func, ud);
 	} else {
-		uboss_globalmq_push(q);
+		uboss_mq_global_push(q);
 		SPIN_UNLOCK(q) // 解锁
 	}
 }

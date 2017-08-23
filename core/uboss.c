@@ -57,6 +57,7 @@ main(int argc, char *argv[]) {
 
 	#if !defined(__WIN32__)
 	config.path_root = "./"; // 根目录
+	config.path_plugin = "./plugin/?.up"; // 插件路径
 	config.thread =  8; // 启动工作线程数
 	config.path_module = "./module/?.so"; // C写的模块路径
 	config.harbor = 1; // 集群的编号
@@ -65,7 +66,8 @@ main(int argc, char *argv[]) {
 	config.log_param = "uboss.log"; // 日志记录器
 	config.path_log = "."; // 保存日志的路径
 	#else
-	config.path_root = ".\\"; // 根目录
+	config.path_root = ".\\"; // 根目录/
+	config.path_plugin = ".\\plugin\\?.up"; // 插件路径
 	config.thread =  8; // 启动工作线程数
 	config.path_module = ".\\module\\?.so"; // C写的模块路径
 //fprintf(stdout, "Module Path = %s\n", config.path_module);

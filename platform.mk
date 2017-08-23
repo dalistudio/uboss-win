@@ -18,7 +18,7 @@ none :
 	@echo "Please do 'make PLATFORM' where PLATFORM is one of these:"
 	@echo "   $(PLATS)"
 
-UBOSS_LIBS := -lpthread -lm
+UBOSS_LIBS := -lpthread -lm -ldl
 SHARED := -fPIC --shared
 EXPORT := -Wl,-E
 

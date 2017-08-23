@@ -47,7 +47,7 @@ LUA_CLIB = uboss
 # uBoss 核心
 UBOSS_CORE = uboss.c uboss_handle.c uboss_module.c uboss_mq.c \
   uboss_server.c uboss_monitor.c uboss_log.c uboss_command.c uboss_timer.c \
-  uboss_context.c
+  uboss_context.c uboss_plugin.c
    
 
 all : \

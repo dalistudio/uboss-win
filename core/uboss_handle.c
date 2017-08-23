@@ -27,7 +27,7 @@ struct handle_name {
 };
 
 // 句柄存储
-struct handle_storage {
+struct handles {
 	struct rwlock lock; // 读写锁
 
 	uint32_t harbor; // 集群ID
@@ -41,12 +41,12 @@ struct handle_storage {
 };
 
 // 声明一个全局的变量
-static struct handle_storage *H = NULL;
+static struct handles *H = NULL;
 
-// 注册句柄 - 注册一个 uBoss 上下文，并返回句柄值
+// 注册句柄 - 注册一个 uBoss 上下文结构，并返回句柄值
 uint32_t
 uboss_handle_register(struct uboss_context *ctx) {
-	struct handle_storage *s = H; // 获得全局变量
+	struct handles *s = H; // 获得全局变量
 
 	rwlock_wlock(&s->lock); // 写锁
 
@@ -92,7 +92,7 @@ uboss_handle_register(struct uboss_context *ctx) {
 		uboss_free(s->slot); // 释放旧槽的空间
 		s->slot = new_slot; // 替换成新槽的地址
 		s->slot_size *= 2; // 修改槽的大小为原来的2倍
-	} // 死循环 for(;;)
+	} // 死循环结束 for(;;)
 
 	// 只有意外的情况下才会执行到这里。
 	// 注意：没有返回值，最好返回0，但可能会重复
@@ -103,7 +103,7 @@ uboss_handle_register(struct uboss_context *ctx) {
 int
 uboss_handle_retire(uint32_t handle) {
 	int ret = 0;
-	struct handle_storage *s = H; // 获得全局变量
+	struct handles *s = H; // 获得全局变量
 
 	rwlock_wlock(&s->lock); // 写锁
 
@@ -143,7 +143,7 @@ uboss_handle_retire(uint32_t handle) {
 // 回收所有句柄
 void
 uboss_handle_retireall() {
-	struct handle_storage *s = H;
+	struct handles *s = H;
 	for (;;) {
 		int n=0;
 		int i;
@@ -170,7 +170,7 @@ uboss_handle_retireall() {
 // 取出 句柄值 对应的上下文结构，并引用加一
 struct uboss_context *
 uboss_handle_grab(uint32_t handle) {
-	struct handle_storage *s = H; // 获得 全局变量
+	struct handles *s = H; // 获得 全局变量
 	struct uboss_context * result = NULL;
 
 	rwlock_rlock(&s->lock); // 读锁
@@ -190,7 +190,7 @@ uboss_handle_grab(uint32_t handle) {
 // 根据名字查找句柄值
 uint32_t
 uboss_handle_findname(const char * name) {
-	struct handle_storage *s = H; // 获得 全局变量
+	struct handles *s = H; // 获得 全局变量
 
 	rwlock_rlock(&s->lock); // 读锁
 
@@ -222,7 +222,7 @@ uboss_handle_findname(const char * name) {
 
 // 在之前插入名字
 static void
-_insert_name_before(struct handle_storage *s, char *name, uint32_t handle, int before) {
+_insert_name_before(struct handles *s, char *name, uint32_t handle, int before) {
 	// 当 总数 大于等于 最大值
 	if (s->name_count >= s->name_cap) {
 		s->name_cap *= 2; // 最大名字数量值 放大2倍
@@ -255,7 +255,7 @@ _insert_name_before(struct handle_storage *s, char *name, uint32_t handle, int b
 
 // 插入名字
 static const char *
-_insert_name(struct handle_storage *s, const char * name, uint32_t handle) {
+_insert_name(struct handles *s, const char * name, uint32_t handle) {
 	int begin = 0;
 	int end = s->name_count - 1;
 	while (begin<=end) {
@@ -294,7 +294,7 @@ uboss_handle_namehandle(uint32_t handle, const char *name) {
 void
 uboss_handle_init(int harbor) {
 	assert(H==NULL); // 判断 全局变量 为空
-	struct handle_storage * s = uboss_malloc(sizeof(*H)); // 分配 全局变量 的内存空间
+	struct handles * s = uboss_malloc(sizeof(*H)); // 分配 全局变量 的内存空间
 	s->slot_size = DEFAULT_SLOT_SIZE; // 设置槽的默认大小
 	s->slot = uboss_malloc(s->slot_size * sizeof(struct uboss_context *)); // 分配槽的内存空间
 	memset(s->slot, 0, s->slot_size * sizeof(struct uboss_context *)); // 清空槽的内存空间

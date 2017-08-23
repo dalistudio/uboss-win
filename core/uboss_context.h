@@ -37,6 +37,17 @@
 
 #endif
 
+// uBoss 的节点
+struct uboss_node {
+	int total; // 节点总数
+	int init;
+	uint32_t monitor_exit;
+	pthread_key_t handle_key;
+};
+
+// 声明静态全局节点变量
+struct uboss_node G_NODE;
+
 // uBoss 上下文结构
 struct uboss_context {
 	void * instance; // 实例
@@ -53,7 +64,7 @@ struct uboss_context {
 	int ref; // 调用次数
 	int message_count;
 	bool init; // 初始化
-	bool endless; // 终结标志
+	bool endless; // 线程无限循环标志
 	bool profile;
 
 	CHECKCALLING_DECL

@@ -29,6 +29,7 @@ struct uboss_config {
 	int harbor; // 集群Id
 
 	const char * path_root; // 根目录的路径
+	const char * path_plugin; // 插件的路径
 	const char * path_module; // 模块的路径
 	const char * path_log; // 本地日志文件的保存路径
 
@@ -38,16 +39,7 @@ struct uboss_config {
 	const char * bootstrap; // LUA引导程序的名称
 };
 
-// uBoss 的节点
-struct uboss_node {
-	int total; // 节点总数
-	int init;
-	uint32_t monitor_exit;
-	pthread_key_t handle_key;
-};
 
-// 声明静态全局节点变量
-struct uboss_node G_NODE;
 
 struct uboss_context;
 
@@ -56,6 +48,9 @@ uint32_t uboss_current_handle(void);
 
 int uboss_send(struct uboss_context * context, uint32_t source, uint32_t destination , int type, int session, void * msg, size_t sz);
 void uboss_server(struct uboss_config * config);
+
+int uboss_sendname(struct uboss_context * context, uint32_t source, const char * addr , int type, int session, void * data, size_t sz);
+
 
 void uboss_globalinit(void);
 void uboss_globalexit(void);

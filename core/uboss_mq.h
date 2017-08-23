@@ -16,8 +16,8 @@
 
 // uboss 消息
 struct uboss_message {
-	uint32_t source; // 来源
-	int session; // 会话
+	uint32_t source; // 消息的来源(前8bit表示集群的编号)
+	int session; // 会话的编号
 	void * data; // 数据的地址
 	size_t sz; // 数据的长度(前8bit表示数据的类型)
 };
@@ -28,8 +28,8 @@ struct uboss_message {
 
 struct message_queue;
 
-void uboss_globalmq_push(struct message_queue * queue);
-struct message_queue * uboss_globalmq_pop(void);
+void uboss_mq_global_push(struct message_queue * queue);
+struct message_queue * uboss_mq_global_pop(void);
 
 struct message_queue * uboss_mq_create(uint32_t handle);
 void uboss_mq_mark_release(struct message_queue *q);
@@ -39,10 +39,12 @@ typedef void (*message_drop)(struct uboss_message *, void *);
 void uboss_mq_release(struct message_queue *q, message_drop drop_func, void *ud);
 uint32_t uboss_mq_handle(struct message_queue *q);
 
+// 返回0表示成功
 // 0 for success
 int uboss_mq_pop(struct message_queue *q, struct uboss_message *message);
 void uboss_mq_push(struct message_queue *q, struct uboss_message *message);
 
+// 返回消息队列的长度，用于调试
 // return the length of message queue, for debug
 int uboss_mq_length(struct message_queue *q);
 int uboss_mq_overload(struct message_queue *q);

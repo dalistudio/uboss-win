@@ -111,7 +111,7 @@ uboss_context_new(const char * name, const char *param) {
 		if (ret) {
 			ctx->init = true; // 设置服务的上下文结构，初始化成功。
 		}
-		uboss_globalmq_push(queue); // 将消息压入全局消息队列
+		uboss_mq_global_push(queue); // 将消息压入全局消息队列
 		if (ret) {
 			uboss_error(ret, "LAUNCH %s %s", name, param ? param : "");
 		}
@@ -191,6 +191,7 @@ uboss_context_push(uint32_t handle, struct uboss_message *message) {
 	return 0;
 }
 
+// 监视器检查到线程进入无限循环，需要标注等待释放。
 void
 uboss_context_endless(uint32_t handle) {
 	struct uboss_context * ctx = uboss_handle_grab(handle);
@@ -246,6 +247,8 @@ dispatch_message(struct uboss_context *ctx, struct uboss_message *msg) {
 void
 uboss_context_dispatchall(struct uboss_context * ctx) {
 	// for uboss_error
+	// 只在 uboss_server.c 的 bootstrap() 中调用，
+	// 主要用于弹出 logger 服务收到的消息。
 	struct uboss_message msg;
 	struct message_queue *q = ctx->queue; // 取出上下文中的消息队列
 	while (!uboss_mq_pop(q,&msg)) { // 弹出消息队列中的消息
@@ -258,7 +261,7 @@ struct message_queue *
 uboss_context_message_dispatch(struct uboss_monitor *sm, struct message_queue *q, int weight) {
 	// 如果传入的消息队列地址为空值
 	if (q == NULL) {
-		q = uboss_globalmq_pop(); // 弹出全局消息
+		q = uboss_mq_global_pop(); // 弹出全局消息
 		if (q==NULL)
 			return NULL;
 	}
@@ -269,7 +272,7 @@ uboss_context_message_dispatch(struct uboss_monitor *sm, struct message_queue *q
 	if (ctx == NULL) {
 		struct drop_t d = { handle };
 		uboss_mq_release(q, drop_message, &d); // 释放消息队列
-		return uboss_globalmq_pop(); // 弹出全局消息队列
+		return uboss_mq_global_pop(); // 弹出全局消息队列
 	}
 
 	int i,n=1;
@@ -278,7 +281,7 @@ uboss_context_message_dispatch(struct uboss_monitor *sm, struct message_queue *q
 	for (i=0;i<n;i++) {
 		if (uboss_mq_pop(q,&msg)) { // 弹出uboss消息
 			uboss_context_release(ctx); // 释放上下文
-			return uboss_globalmq_pop(); // 从全局队列中弹出消息
+			return uboss_mq_global_pop(); // 从全局队列中弹出消息
 		} else if (i==0 && weight >= 0) {
 			n = uboss_mq_length(q); // 获得队列的长度
 			n >>= weight; // 权重
@@ -313,13 +316,13 @@ uboss_context_message_dispatch(struct uboss_monitor *sm, struct message_queue *q
 	}
 
 	assert(q == ctx->queue);
-	struct message_queue *nq = uboss_globalmq_pop();
+	struct message_queue *nq = uboss_mq_global_pop();
 	if (nq) {
 		// 如果全局消息队列不为空，压入q后，并返回下一个消息队列 nq
 		// If global mq is not empty , push q back, and return next queue (nq)
 		// 否则，全局消息队列为空或则阻塞，不压入q后，并返回 q，再一次调度
 		// Else (global mq is empty or block, don't push q back, and return q again (for next dispatch)
-		uboss_globalmq_push(q);
+		uboss_mq_global_push(q);
 		q = nq;
 	}
 	uboss_context_release(ctx);
