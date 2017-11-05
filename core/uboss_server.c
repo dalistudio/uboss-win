@@ -295,12 +295,12 @@ thread_worker(void *p) {
 	int id = wp->id;
 	int weight = wp->weight;
 	struct monitor *m = wp->m;
-	struct uboss_monitor *sm = m->m[id];
+	struct uboss_monitor *um = m->m[id];
 
 	uboss_initthread(THREAD_WORKER); // 初始化线程
 	struct message_queue * q = NULL; // 传入NULL消息队列，便于从全局队列中弹出一个消息队列
 	while (!m->quit) {
-		q = uboss_context_message_dispatch(sm, q, weight); // 核心功能: 从消息队列中取出服务的消息
+		q = uboss_context_message_dispatch(um, q, weight); // 核心功能: 从消息队列中取出服务的消息
 
 		// 如果全局消息队列中没有任何消息
 		if (q == NULL) {

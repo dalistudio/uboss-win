@@ -57,7 +57,8 @@ uboss_handle_register(struct uboss_context *ctx) {
 		// 循环所有槽
 		for (i=0;i<s->slot_size;i++) {
 			// 获得最后的句柄值 加上 i的值 与上句柄的掩码
-			// 限制生成的 句柄值 只能在句柄的掩码范围之内
+			// 限制生成的 句柄值 只能在句柄的掩码范围之内，
+			// 当句柄索引值大约掩码，句柄将从0开始，所以不会越界。
 			// 最多有 0xFFFFFF（1600W） 个句柄，每个句柄占4字节，即最大需要64MB内存空间
 			uint32_t handle = (i+s->handle_index) & HANDLE_MASK;
 
@@ -69,7 +70,7 @@ uboss_handle_register(struct uboss_context *ctx) {
 			// 找到一个空的槽，并将 上下文结构 赋给这个槽
 			if (s->slot[hash] == NULL) { // 如果槽为空
 				s->slot[hash] = ctx; // 将上下文放入槽中
-				s->handle_index = handle + 1; // 句柄引索加一
+				s->handle_index = handle + 1; // 重置 句柄索引 = 句柄加一
 
 				rwlock_wunlock(&s->lock); // 写解锁
 
@@ -78,8 +79,9 @@ uboss_handle_register(struct uboss_context *ctx) {
 			}
 		}
 
-		// 如果循环完所有槽，都找不到空槽，则将槽的总数扩大2倍
-		assert((s->slot_size*2 - 1) <= HANDLE_MASK); // 断言槽的总数不大于 HANDLE_MASK ，即0xffffff。
+		// 如果循环完所有槽，都找不到空槽，则将槽的总数扩大2倍，最大约1600万个句柄
+		// TODO：这里应该判断一下槽快满了，或者已满，需要通知一下，或做处理。
+		assert((s->slot_size*2 - 1) <= HANDLE_MASK); // 断言槽的总数不大于 HANDLE_MASK ，即0xffffff（1600W）。
 		struct uboss_context ** new_slot = uboss_malloc(s->slot_size * 2 * sizeof(struct uboss_context *)); // 分配槽的两倍内存空间
 		memset(new_slot, 0, s->slot_size * 2 * sizeof(struct uboss_context *)); // 初始化内存空间为空
 

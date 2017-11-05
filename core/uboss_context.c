@@ -19,8 +19,6 @@
 #include "uboss_log.h"
 #include "uboss_timer.h"
 
-#include <pthread.h>
-
 #include <string.h>
 #include <assert.h>
 #include <stdint.h>
@@ -89,8 +87,8 @@ uboss_context_new(const char * name, const char *param) {
 	ctx->session_id = 0; // 服务的会话ID
 	ctx->logfile = NULL; // 是否开启日志记录到文件功能
 
-	ctx->init = false; // 是否初始化
-	ctx->endless = false; // 是否进入了无限循环
+	ctx->is_init = false; // 是否初始化
+	ctx->is_endless = false; // 是否进入了无限循环
 
 	// 应该先设置句柄为0,以避免 uboss_handle_retireall 回收时获得一个为初始化的句柄。
 	// Should set to 0 first to avoid uboss_handle_retireall get an uninitialized handle
@@ -109,7 +107,7 @@ uboss_context_new(const char * name, const char *param) {
 	if (r == 0) { // 初始化函数返回值为0，表示正常。(在服务模块中约定)
 		struct uboss_context * ret = uboss_context_release(ctx); // 检查上下文释放标志 ref 是否为0
 		if (ret) {
-			ctx->init = true; // 设置服务的上下文结构，初始化成功。
+			ctx->is_init = true; // 设置服务的上下文结构，初始化成功。
 		}
 		uboss_mq_global_push(queue); // 将消息压入全局消息队列
 		if (ret) {
@@ -198,7 +196,7 @@ uboss_context_endless(uint32_t handle) {
 	if (ctx == NULL) {
 		return;
 	}
-	ctx->endless = true;
+	ctx->is_endless = true;
 	uboss_context_release(ctx);
 }
 
@@ -211,7 +209,7 @@ uboss_context_handle(struct uboss_context *ctx) {
 // 分发消息
 static void
 dispatch_message(struct uboss_context *ctx, struct uboss_message *msg) {
-	assert(ctx->init);
+	assert(ctx->is_init);
 	CHECKCALLING_BEGIN(ctx)
 	pthread_setspecific(G_NODE.handle_key, (void *)(uintptr_t)(ctx->handle)); // 设置线程通道
 	int type = msg->sz >> MESSAGE_TYPE_SHIFT; // 获得消息的类型
@@ -222,7 +220,7 @@ dispatch_message(struct uboss_context *ctx, struct uboss_message *msg) {
 	++ctx->message_count;
 
 	int reserve_msg;
-	if (ctx->profile) {
+	if (ctx->is_profile) {
 		// 这里获得线程开始的时间，然后执行返回函数，再调用时间
 		// 最后计算整个服务中的返回函数一共执行了多少时间。
 		ctx->cpu_start = uboss_thread_time(); // 获得开始时间

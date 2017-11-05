@@ -31,13 +31,13 @@
 struct message_queue {
 	struct spinlock lock; // 锁
 	uint32_t handle; // 句柄值
-	int cap; // 链表数量
+	int cap; // 消息队列的容量
 	int head; // 链表头
 	int tail; // 链表尾
 	int is_release; // 是否可释放
-	int is_global; // 是否在全局队列
+	int is_global; // 是否为全局消息队列
 	int is_overload; // 是否过载
-	int overload_threshold; // 过载阀值
+	int overload; // 过载阀值
 	struct uboss_message *queue;  // 消息队列的指针
 	struct message_queue *next;  // 下一个消息队列的指针
 };
@@ -108,13 +108,13 @@ uboss_mq_create(uint32_t handle) {
 	q->head = 0; // 链表的头
 	q->tail = 0; // 链表的尾
 	SPIN_INIT(q) // 初始化锁
-	// When the queue is create (always between service create and service init) ,
-	// set is_global flag to avoid push it to global queue .
-	// If the service init success, uboss_context_new will call uboss_mq_push to push it to global queue.
-	q->is_global = MQ_IS_GLOBAL; // 是否在全局队列中：0=否 1=是 （默认为1）
+	// 当队列被创建时（总是在服务创建和服务初始化之间），
+	// 设置 is_global 标志为了避免压入它到全局队列。
+	// 如果服务初始化完成，uboss_context_new 将调用 uboss_mq_push 将它压入全局队列。
+	q->is_global = MQ_IS_GLOBAL; // 是否在全局消息队列中：0=否 1=是 （默认为1）
 	q->is_release = 0; // 是否可释放：0=否 1=是
 	q->is_overload = 0; // 是否过载：0=否 1=是
-	q->overload_threshold = MQ_OVERLOAD; // 过载的阀值 （默认为1024）
+	q->overload = MQ_OVERLOAD; // 过载的阀值 （默认为1024）
 	q->queue = uboss_malloc(sizeof(struct uboss_message) * q->cap); // 分配队列的内存空间
 	q->next = NULL; // 下一个队列的指针
 
@@ -133,7 +133,7 @@ _release(struct message_queue *q) {
 // 从服务的消息队列中获取句柄的值
 uint32_t
 uboss_mq_handle(struct message_queue *q) {
-	return q->handle; // 返回句柄
+	return q->handle; // 返回句柄uboss_mq_push
 }
 
 // 获得消息队列的长度
@@ -189,14 +189,14 @@ uboss_mq_pop(struct message_queue *q, struct uboss_message *message) {
 		}
 
 		// 如果队列长度 大于 过载阀值，阀值放大2倍
-		while (length > q->overload_threshold) {
+		while (length > q->overload) {
 			q->is_overload = length; // 过载值 = 队列长度
-			q->overload_threshold *= 2; // 过载阀值放大2倍
+			q->overload *= 2; // 过载阀值放大2倍
 		}
 	} else {
 		// 服务消息队列为空时，重置 过载阀值 为默认值
 		// 当消息队列为空时，是否也应该重置一下 消息队列 为默认值
-		q->overload_threshold = MQ_OVERLOAD; // 否则过载阀值为默认 1024
+		q->overload = MQ_OVERLOAD; // 否则过载阀值为默认 1024
 	}
 
 	if (ret) {

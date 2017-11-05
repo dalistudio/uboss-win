@@ -37,6 +37,7 @@ uboss.dll : \
 	core/uboss_module.c \
 	core/uboss_command.c \
 	core/uboss_context.c \
+	core/uboss_plugin.c \
 	core/uboss_log.c 
 	$(CC) $(CFLAGS) -c $^ -I./core $(LDFLAGS) \
 	-DPTW32_STATIC_LIB -march=i686 -I/usr/i686-w64-mingw32/include -I3rd/dlfcn
@@ -78,4 +79,4 @@ uboss.so : \
 
 
 clean :
-	rm *.dll *.exe *.so *.o *.a 3rd/lua/src/*.o 3rd/lua/src/*.a 3rd/lua/src/*.dll 3rd/lua/src/*.exe
+	rm uboss.dll uboss.exe *.so *.o *.a 3rd/lua/src/*.o 3rd/lua/src/*.a 3rd/lua/src/*.dll 3rd/lua/src/*.exe

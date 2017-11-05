@@ -61,14 +61,14 @@ uboss_plugin_instance_release(struct uboss_plugin *p, void *inst) {
 
 // 检查点函数
 void
-uboss_plugin_check(const char * name)
+uboss_plugin_check(uint32_t id, void *data)
 {
 
 }
 
 // 注册检查点的返回函数
 void
-uboss_plugin_register(const char * name, uboss_plugin_cb cb)
+uboss_plugin_register(uint32_t id, uboss_plugin_cb cb)
 {
 
 }

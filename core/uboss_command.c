@@ -181,9 +181,9 @@ cmd_starttime(struct uboss_context * context, const char * param) {
 // 设置终结服务指令
 static const char *
 cmd_endless(struct uboss_context * context, const char * param) {
-	if (context->endless) { // 如果有终结指令存在
+	if (context->is_endless) { // 如果有终结指令存在
 		strcpy(context->result, "1"); // 打印 "1" 到返回字符串中
-		context->endless = false;
+		context->is_endless = false;
 		return context->result;
 	}
 	return NULL;
@@ -220,9 +220,9 @@ cmd_stat(struct uboss_context * context, const char * param) {
 		int len = uboss_mq_length(context->queue);
 		sprintf(context->result, "%d", len);
 	} else if (strcmp(param, "endless") == 0) {
-		if (context->endless) {
+		if (context->is_endless) {
 			strcpy(context->result, "1");
-			context->endless = false;
+			context->is_endless = false;
 		} else {
 			strcpy(context->result, "0");
 		}
@@ -230,7 +230,7 @@ cmd_stat(struct uboss_context * context, const char * param) {
 		double t = (double)context->cpu_cost / 1000000.0;	// microsec
 		sprintf(context->result, "%lf", t);
 	} else if (strcmp(param, "time") == 0) {
-		if (context->profile) {
+		if (context->is_profile) {
 			uint64_t ti = uboss_thread_time() - context->cpu_start;
 			double t = (double)ti / 1000000.0;	// microsec
 			sprintf(context->result, "%lf", t);

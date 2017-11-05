@@ -13,6 +13,8 @@
 
 #include "uboss.h"
 
+#include <pthread.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -50,22 +52,28 @@ struct uboss_node G_NODE;
 
 // uBoss 上下文结构
 struct uboss_context {
-	void * instance; // 实例
+	uint32_t handle; // 句柄值
+	int session_id; // 会话的索引
+
 	struct uboss_module * mod; // 模块
+	void * instance; // 模块的create函数的实例
 	void * cb_ud; // 用户数据的指针
 	uboss_cb cb; // 服务模块的返回函数指针
+
 	struct message_queue *queue; // 消息队列
+	int message_count; // 服务消息的总数
+
 	FILE * logfile; // 日志文件流
-	uint64_t cpu_cost;	// in microsec
-	uint64_t cpu_start;	// in microsec
-	char result[32]; // 结果
-	uint32_t handle; // 句柄值
-	int session_id; // 会话 ID
-	int ref; // 调用次数
-	int message_count;
-	bool init; // 初始化
-	bool endless; // 线程无限循环标志
-	bool profile;
+
+	bool is_profile; // 是否开启性能剖析
+	uint64_t cpu_start;	// 线程执行开始时间(微秒)
+	uint64_t cpu_cost;	// 线程执行耗时(微秒)
+
+	bool is_init; // 是否初始化
+	bool is_endless; // 是否线程进入无限循环
+	int ref; // 此上下文的引用次数
+
+	char result[32]; // 文本指令Command的结果
 
 	CHECKCALLING_DECL
 };

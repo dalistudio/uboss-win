@@ -16,6 +16,8 @@
 #include "uboss_handle.h"
 #include "uboss_log.h"
 
+#include <pthread.h>
+
 #include <time.h>
 #include <assert.h>
 #include <string.h>
