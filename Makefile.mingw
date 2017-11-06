@@ -41,7 +41,7 @@ uboss.dll : \
 	core/uboss_log.c 
 	$(CC) $(CFLAGS) -c $^ -I./core $(LDFLAGS) \
 	-DPTW32_STATIC_LIB -march=i686 -I/usr/i686-w64-mingw32/include -I3rd/dlfcn
-	$(CC) $(CFLAGS) $(SHARED) -o $@ *.o $(LDFLAGS) -I/usr/i686-w64-mingw32/include -I3rd/dlfcn -L3rd/lua/src
+	$(CC) $(CFLAGS) $(SHARED) -o $@ *.o $(LDFLAGS) -I/usr/i686-w64-mingw32/include -I3rd/dlfcn -L3rd/lua/src  -Wl,--output-def,uboss.def,--out-implib,libuboss.a
 	rm *.o
 
 uboss.exe : \
