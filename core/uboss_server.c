@@ -11,7 +11,6 @@
 #include "uboss_server.h"
 
 #include "uboss.h"
-#include "uboss_plugin.h"
 #include "uboss_context.h"
 #include "uboss_handle.h"
 #include "uboss_module.h"
@@ -40,8 +39,8 @@ uboss_lalloc(void *ud, void *ptr, size_t osize, size_t nsize) {
 
 #if defined(__WIN32__)
 // 添加strsep函数
-char 
-*strsep(char **stringp, const char *delim)
+char *
+uboss_strsep(char **stringp, const char *delim)
 {
     char *s;
     const char *spanp;
@@ -489,7 +488,6 @@ bootstrap(struct uboss_context * logger, const char * cmdline) {
  * */
 void
 uboss_server(struct uboss_config * config) {
-	uboss_plugin_init(config->path_plugin); // 初始化插件
 	uboss_handle_init(config->harbor); // 初始化 服务句柄模块
 	uboss_mq_init(); // 初始化 消息队列模块
 	uboss_module_init(config->path_module); // 初始化 服务加载模块

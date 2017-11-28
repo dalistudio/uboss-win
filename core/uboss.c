@@ -43,7 +43,7 @@ main(int argc, char *argv[]) {
 		config_file = "uboss.conf";
 	}
 
-	fprintf(stdout, "Config File = %s\n", config_file);
+//	fprintf(stdout, "Config File = %s\n", config_file);
 
 
 	uboss_globalinit(); // 全局初始化

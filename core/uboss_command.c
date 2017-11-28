@@ -158,8 +158,8 @@ cmd_launch(struct uboss_context * context, const char * param) {
 	char tmp[sz+1];
 	strcpy(tmp,param); // 复制参数到临时字符串
 	char * args = tmp;
-	char * mod = strsep(&args, " \t\r\n");
-	args = strsep(&args, "\r\n");
+	char * mod = uboss_strsep(&args, " \t\r\n");
+	args = uboss_strsep(&args, "\r\n");
 	struct uboss_context * inst = uboss_context_new(mod,args); // 新建上下文
 	if (inst == NULL) {
 		return NULL;
