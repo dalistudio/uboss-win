@@ -1,5 +1,5 @@
 /*
-** Copyright (c) 2014-2017 uboss.org All rights reserved.
+** Copyright (c) 2014-2018 uboss.org All rights reserved.
 ** uBoss - A Lightweight MicroService Framework
 **
 ** uBoss Main Function
@@ -14,14 +14,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define UBOSS_VERSION_MAJOR	"3"
-#define UBOSS_VERSION_MINOR	"0"
+#define UBOSS_VERSION_MAJOR	"0"
+#define UBOSS_VERSION_MINOR	"1"
 #define UBOSS_VERSION_RELEASE	"0"
-#define UBOSS_VERSION_NUM	300
+#define UBOSS_VERSION_NUM	010
 
 #define UBOSS_VERSION	"uBoss " UBOSS_VERSION_MAJOR "." UBOSS_VERSION_MINOR
 #define UBOSS_RELEASE	UBOSS_VERSION "." UBOSS_VERSION_RELEASE
-#define UBOSS_COPYRIGHT	UBOSS_RELEASE "  Copyright (c) 2014-2017 uboss.org  All rights reserved."
+#define UBOSS_COPYRIGHT	UBOSS_RELEASE "  Copyright (c) 2014-2018 uboss.org  All rights reserved."
 #define UBOSS_AUTHORS	"Dali Wang <dali@uboss.org>"
 
 // 预留内存分配函数的钩子
@@ -145,7 +145,7 @@ char * uboss_strdup(const char *str);
 /*
 The MIT License (MIT)
 
-Copyright (c) 2014-2017 uboss.org
+Copyright (c) 2014-2018 uboss.org
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
