@@ -1,5 +1,5 @@
 /*
-** Copyright (c) 2014-2017 uboss.org All rights reserved.
+** Copyright (c) 2014-2018 uboss.org All rights reserved.
 ** uBoss - A Lightweight MicroService Framework
 **
 ** uBoss Server
@@ -29,7 +29,6 @@ struct uboss_config {
 	int harbor; // 集群Id
 
 	const char * path_root; // 根目录的路径
-	const char * path_plugin; // 插件的路径
 	const char * path_module; // 模块的路径
 	const char * path_log; // 本地日志文件的保存路径
 

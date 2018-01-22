@@ -31,21 +31,6 @@ int sigign() {
 
 int
 main(int argc, char *argv[]) {
-
-	const char * config_file = NULL ;
-
-	// 执行必须有一个参数，否则打印错误信息。
-	if (argc > 1) {
-		config_file = argv[1];
-	} else {
-//		fprintf(stderr, "usage: uboss configfilename\n");
-//		return 1;
-		config_file = "uboss.conf";
-	}
-
-//	fprintf(stdout, "Config File = %s\n", config_file);
-
-
 	uboss_globalinit(); // 全局初始化
 
 	#if !defined(__WIN32__)
@@ -57,7 +42,6 @@ main(int argc, char *argv[]) {
 
 	#if !defined(__WIN32__)
 	config.path_root = "./"; // 根目录
-	config.path_plugin = "./plugin/?.up"; // 插件路径
 	config.thread =  8; // 启动工作线程数
 	config.path_module = "./module/?.so"; // C写的模块路径
 	config.harbor = 1; // 集群的编号
@@ -67,10 +51,8 @@ main(int argc, char *argv[]) {
 	config.path_log = "."; // 保存日志的路径
 	#else
 	config.path_root = ".\\"; // 根目录/
-	config.path_plugin = ".\\plugin\\?.up"; // 插件路径
 	config.thread =  8; // 启动工作线程数
 	config.path_module = ".\\module\\?.so"; // C写的模块路径
-//fprintf(stdout, "Module Path = %s\n", config.path_module);
 	config.harbor = 1; // 集群的编号
 	config.bootstrap = "luavm bootstrap"; // 启动脚本
 	config.log_service = "logger"; // 日志记录器的服务

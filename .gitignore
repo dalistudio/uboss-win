@@ -35,3 +35,4 @@ uboss
 # Debug files
 *.dSYM/
 .settings/
+/.metadata/

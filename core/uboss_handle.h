@@ -1,5 +1,5 @@
 /*
-** Copyright (c) 2014-2017 uboss.org All rights reserved.
+** Copyright (c) 2014-2018 uboss.org All rights reserved.
 ** uBoss - A Lightweight MicroService Framework
 **
 ** uBoss Service Handle
