@@ -1,0 +1,19 @@
+1、修改lua根目录下的Makefile文件
+	在PLATS= aix bsd c89 freebsd generic linux macosx mingw posix solaris下添加clang，如下
+	PLATS= aix bsd c89 freebsd generic linux macosx mingw posix solaris clang
+
+2、修改src目录下的Makefile文件
+	在mingw:添加 clang: 如下
+	clang:
+		$(MAKE) CC="clang" AR="llvm-ar rcu" RANLIB="echo" "LUA_A=lua53.dll"\
+		"AR=clang -shared -o" \
+		"SYSCFLAGS=-DLUA_BUILD_AS_DLL" "SYSLIBS=" "SYSLDFLAGS=" "LIBS=" lua53.dll
+		$(MAKE) CC="clang" AR="llvm-ar rcu" RANLIB="llvm-ranlib" "LUA_A=lua53.lib" "LUA_T=lua.exe" LIBS="$(SYSLIBS) $(MYLIBS)" lua.exe
+		$(MAKE) CC="clang" AR="llvm-ar rcu" RANLIB="llvm-ranlib" "LUAC_T=luac.exe" LIBS="$(SYSLIBS) $(MYLIBS)" luac.exe
+
+3、编译
+	进入lua根目录输入命令：
+	make clang
+
+注释：1、需要到llvm.org下载clang 64位版本，并安装。
+      2、记得下载make 的 windows 64位版本，放在windows\system32目录中

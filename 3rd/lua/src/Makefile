@@ -26,7 +26,7 @@ MYOBJS=
 
 # == END OF USER SETTINGS -- NO NEED TO CHANGE ANYTHING BELOW THIS LINE =======
 
-PLATS= aix bsd c89 freebsd generic linux macosx mingw posix solaris
+PLATS= aix bsd c89 freebsd generic linux macosx mingw posix solaris clang
 
 LUA_A=	liblua.a
 CORE_O=	lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o \
@@ -117,6 +117,13 @@ mingw:
 	"AR=$(CC) -shared -o" "RANLIB=strip --strip-unneeded" \
 	"SYSCFLAGS=-DLUA_BUILD_AS_DLL" "SYSLIBS=" "SYSLDFLAGS=-s" lua.exe
 	$(MAKE) "LUAC_T=luac.exe" luac.exe
+
+clang:
+		$(MAKE) CC="clang" AR="llvm-ar rcu" RANLIB="echo" "LUA_A=lua53.dll"\
+		"AR=clang -shared -o" \
+		"SYSCFLAGS=-DLUA_BUILD_AS_DLL" "SYSLIBS=" "SYSLDFLAGS=" "LIBS=" lua53.dll
+		$(MAKE) CC="clang" AR="llvm-ar rcu" RANLIB="llvm-ranlib" "LUA_A=lua53.lib" "LUA_T=lua.exe" LIBS="$(SYSLIBS) $(MYLIBS)" lua.exe
+		$(MAKE) CC="clang" AR="llvm-ar rcu" RANLIB="llvm-ranlib" "LUAC_T=luac.exe" LIBS="$(SYSLIBS) $(MYLIBS)" luac.exe
 
 posix:
 	$(MAKE) $(ALL) SYSCFLAGS="-DLUA_USE_POSIX"
